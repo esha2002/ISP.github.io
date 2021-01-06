@@ -1,0 +1,964 @@
+// The "SnakesandLadders" class.
+import java.awt.image.*;
+import java.awt.*;
+import hsa.*;
+import java.io.*;
+import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
+
+public class SnakesandLadders
+{
+    static Console c; // The output console
+    static final int TOTAL = 10;
+    int choice;
+    String player1Name;
+    String player2Name;
+    int difficulty;
+    String numstr;
+    int clearFile;
+    int player1Moves = 0;
+    int player2Moves = 0;
+    int die1Num;
+    int die2Num;
+    int dieTotal;
+    boolean winCheck1;
+    boolean winCheck2;
+    //String[] top10Names = new String [TOTAL];
+    String[] top10Names = {"", "", "", "", "", "", "", "", "", ""};
+    int[] top10Scores = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+    String[] top10Levels;
+    public SnakesandLadders ()
+    {
+	c = new Console ("Snakes and Ladders");
+    }
+
+
+    public void animation ()
+    {
+	Animation a = new Animation (c);
+	a.run ();
+    }
+
+
+    public void splashScreen ()
+    {
+	drawTitle ();
+	c.println ("This is a two player game of snakes and ladders.");
+	animation ();
+	try
+	{
+	    Thread.sleep (1000);
+	}
+	catch (Exception e)
+	{
+	}
+    }
+
+
+    // This method draws the title of the program
+    private void drawTitle ()
+    {
+	c.clear ();
+	c.print (' ', 32);
+	c.println ("Snakes and Ladders");
+	c.println (' ');
+    }
+
+
+    /* this program pauses the program and waits for the user to input a character
+    name type description/purpose of variable
+    key char reads the character the user inputs
+    */
+    private void pauseProgram ()
+    {
+	c.print ("Press any to continue...");
+	char key = c.getChar ();
+    }
+
+
+    //this method displays the program instructions
+    public void instructions ()
+    {
+	drawTitle ();
+	c.println ("Instructions:");
+	c.println ();
+	c.println ("This is a two player game of snakes and ladders");
+	c.println ();
+	c.println ("1. Choose level difficulty");
+	c.println ();
+	c.println ("2. Enter both player names.");
+	c.println ();
+	c.println ("3.Play the game, press r to roll the dice.");
+	c.println ();
+	c.println ("4.Top 10 winners will be stored in a file called winners.txt");
+	c.println ();
+	c.println ("5.You view the top 10 winner in the highScore option in mainMenu");
+	c.println ();
+	c.println ("5.You can clear the file that stores the winners in the highScore option in mainMenu");
+	c.println ();
+	pauseProgram ();
+    }
+
+
+    private void fileWritter ()
+    {
+	winCheck1 = true;
+	player1Moves = 1;
+	player1Name = "zdjkhakhfkjashkja";
+	String line = "";
+	int z = 0;
+	int i = 1;
+	try
+	{
+	    BufferedReader reader = new BufferedReader (new FileReader ("winners.txt"));
+
+	    //loop for as long as there is data in  the file
+	    while (line != " " && line != null)
+	    {
+		for (int x = 0 ; x <= 21 ; x++)
+		{
+		    //line = reader.readLine ();
+		    //c.println (line);
+		    //if (line == null)
+		    //{
+		    //   break;
+		    //}
+		    //for (int y = 0 ; y < TOTAL ; y++)
+		    //{
+		    if (x == 1 || x == 3 || x == 5 || x == 7 || x == 9 || x == 11 || x == 13 || x == 15 || x == 17 || x == 19)
+		    {
+			z++;
+			top10Names [x - z] = reader.readLine ();
+			//c.println ("k" + z);
+
+
+		    }
+
+		    else if (x == 2 || x == 4 || x == 6 || x == 8 || x == 10 || x == 12 || x == 14 || x == 16 || x == 18 || x == 20)
+		    {
+			line = reader.readLine ();
+
+			if (line != " " && line != null)
+			{
+			    i++;
+			    top10Scores [x - i] = Integer.parseInt (line);
+			    //c.println ("j" + y);
+
+			}
+		    }
+		    else
+			line = reader.readLine ();
+
+		    // }
+		}
+	    }
+	    reader.close ();  //close file
+
+	}
+	catch (IOException e)   //catch any file related errors
+	{
+	    System.out.println (e);  //print error
+	}
+
+	if (winCheck1 == true)
+	{
+	    for (int x = 0 ; x < 9 ; x++)
+	    {
+		if ((player1Moves < top10Scores [x]) || (top10Scores [x] == ' '))
+		{
+		    for (int y = 9 ; y > x ; y--)
+		    {
+			top10Scores [y] = top10Scores [y - 1];
+			top10Names [y] = top10Names [y - 1];
+		    }
+		    top10Scores [x] = player1Moves;
+		    top10Names [x] = player1Name;
+		    break;
+		}
+	    }
+	}
+	else if (winCheck2 == true)
+	{
+	    for (int x = 0 ; x < 9 ; x++)
+	    {
+		if ((player2Moves < top10Scores [x]) || (top10Scores [x] == ' '))
+		{
+		    for (int y = 9 ; y > x ; y--)
+		    {
+			top10Scores [y] = top10Scores [y - 1];
+			top10Names [y] = top10Names [y - 1];
+		    }
+		    top10Scores [x] = player2Moves;
+		    top10Names [x] = player2Name;
+		    break;
+		}
+	    }
+	}
+	PrintWriter output;
+	try
+	{
+	    output = new PrintWriter (new FileWriter ("winners.txt"));
+	    output.println ("Top 10 players");
+	    for (int x = 0 ; x < TOTAL ; x++)
+	    {
+		output.println (top10Names [x] + " ");
+		output.println (top10Scores [x]);
+	    }
+	    output.close ();
+	}
+	catch (IOException e)
+	{
+	}
+    }
+
+
+    public void highScore ()
+    {
+	drawTitle ();
+	fileWritter ();
+	c.println ("The top 10 players and their scores are saved in a file called winners.txt");
+	c.println ("Would you like to clear the file?");
+	c.println ();
+	c.println ("1. yes");
+	c.println ("2. no");
+	c.println ();
+	c.print ("Enter your choice:");
+	while (true)
+	{
+	    try
+	    {
+		c.setCursor (10, 1);
+		c.print (' ', 80);
+		c.setCursor (10, 1);
+		numstr = c.readLine ();
+		clearFile = Integer.parseInt (numstr);
+		if (clearFile < 1 || clearFile > 2)
+		{
+		    JOptionPane.showMessageDialog (null, "Please enter either 1 or 2", "Error", JOptionPane.ERROR_MESSAGE);
+		    highScore ();
+		}
+		break;
+	    }
+	    catch (NumberFormatException e)
+	    {
+		JOptionPane.showMessageDialog (null, "Enter an integer. Try again", "Error", JOptionPane.ERROR_MESSAGE);
+		highScore ();
+	    }
+	    if (clearFile == 1)
+	    {
+		String[] top10Names = {"", "", "", "", "", "", "", "", "", ""};
+		int[] top10Scores = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+		PrintWriter output;
+		try
+		{
+		    output = new PrintWriter (new FileWriter ("winners.txt"));
+		    output.println ("Top 10 players");
+		    /*for (int x = 0 ; x < TOTAL ; x++)
+		    {
+		    output.print (top10Names [x] + " ");
+		    output.println (top10Scores [x]);
+		    }
+		    output.close ();
+		    }
+		    catch(IOExceptione)
+		    {
+		    }
+		    }
+		    }
+		    }
+
+
+		    //thismethodletstheuserdecidehowtheywanttocontinue.Theifstatmentsareusedfor error trapping.
+		    publicvoidmainMenu()
+		    {
+		    drawTitle();
+		    c.println("1.Play");
+		    c.println("2.Instructions.");
+		    c.println("3.HighScores.");
+		    c.println("4.Exit.");
+		    c.println();
+		    c.println("Choosehowyouwouldliketocontinue,Enterthenumberofyour choice: ");
+		    while(true)
+		    {
+		    try
+		    {
+		    c.setCursor(9,1);
+		    c.print('',80);
+		    c.setCursor(9,1);
+		    numstr=c.readLine();
+		    choice=Integer.parseInt(numstr);
+		    if(choice<1|| choice > 4)
+		    {
+		    while (true)
+		    {
+			JOptionPane.showMessageDialog (null, "Please Enter a number between 1 and 4", "Error", JOptionPane.ERROR_MESSAGE);
+			mainMenu ();
+		    }
+		    }
+		    break;
+		    }
+		    catch(NumberFormatExceptione)
+		    {
+		    JOptionPane.showMessageDialog(null,"Enteraninteger. Try again", "Error", JOptionPane.ERROR_MESSAGE);
+		    mainMenu();
+		    }
+		    }
+		    }
+
+
+		    publicvoiddifficultyLevel()
+		    {
+		    drawTitle();
+		    c.println("1.Easy");
+		    c.println("2.Hard");
+		    c.println("Chooseyourdifficultylevel:");
+		    c.println();
+		    while(true)
+		    {
+		    try
+		    {
+		    c.setCursor(6,1);
+		    c.print('',80);
+		    c.setCursor(6,1);
+		    numstr=c.readLine();
+		    difficulty=Integer.parseInt(numstr);
+		    if(difficulty<1|| difficulty > 2)
+		    {
+		    while (true)
+		    {
+			JOptionPane.showMessageDialog (null, "Please Enter either 1 or 2", "Error", JOptionPane.ERROR_MESSAGE);
+			difficultyLevel ();
+		    }
+		    }
+		    break;
+		    }
+		    catch(NumberFormatExceptione)
+		    {
+		    JOptionPane.showMessageDialog(null,"Enteraninteger. Try again", "Error", JOptionPane.ERROR_MESSAGE);
+		    difficultyLevel();
+
+		    }
+		    }
+		    }
+
+
+		    publicvoidplayers()
+		    {
+		    drawTitle();
+		    c.println("Enterplayer1name:");
+		    player1Name=c.readLine();
+		    c.println("Enterplayer2name:");
+		    player2Name=c.readLine();
+		    }
+
+
+		    publicvoidplayHardGame()
+		    {
+		    charroll;
+		    StringplayerTurn="";
+		    Stringwinner="";
+		    intx1=199;
+		    inty1=434;
+		    intx2=199;
+		    inty2=434;
+		    intcount1=0;
+		    intcount2=0;
+		    intposition1;
+		    drawTitle();
+		    while(winner=="")
+		    {
+		    try
+		    {
+		    BufferedImageboardPic=ImageIO.read(new File ("Hard.jpg"));
+		    c.drawImage(boardPic,230,80,null);
+		    }
+		    catch(IOExceptione)
+		    {
+		    }
+		    //c.drawLine(230,80,230,475);
+		    //c.drawLine(230,80,635,80);
+		    c.setColor(Color.pink);
+		    c.fillOval(x1,y1,30,30);
+		    c.setColor(Color.blue);
+		    c.fillOval(x2,y2,30,30);
+		    c.setColor(Color.black);
+		    c.drawOval(x1,y1,30,30);
+		    c.drawOval(x2,y2,30,30);
+		    //experiment
+		    //c.fillOval(238,y1,30,30);
+		    //c.fillOval(579,y1,30,30);
+		    count1=0;
+		    count2=0;
+		    if(player1Moves>player2Moves)
+		    {
+		    playerTurn=player2Name;
+		    }
+		    elseif(player1Moves==player2Moves)
+		    {
+		    playerTurn=player1Name;
+		    }
+		    if((x2==237)&&(y2==83))
+		    {
+		    count2=dieTotal;
+		    winner=player2Name;
+		    winCheck2=true;
+		    c.println("" + player2Name + " won !");
+		    break;
+		    }
+		    elseif((x1==237)&&(y1==83))
+		    {
+		    count1=dieTotal;
+		    winner=player1Name;
+		    winCheck1=true;
+		    c.println("" + player1Name + " won !");
+		    break;
+		    }
+		    c.setCursor(3,1);
+		    c.println();
+		    c.setCursor(3,1);
+		    c.print("Itis"+playerTurn+"'sturn.  Press r to roll or e to exit: ");
+		    roll=c.readChar();
+		    if((roll=='r')&&(playerTurn==player1Name))
+		    {
+		    die1Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    die2Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    dieTotal=die1Num+die2Num;
+		    c.print("Die1:"+ die1Num + " Die 2: " + die2Num + " Total: " + dieTotal);
+		    while(count1<dieTotal)
+		    {
+		    while ((x1 <= 570) && ((y1 == 434) || (y1 == 356) || (y1 == 278) || (y1 == 200) || (y1 == 122)))
+		    {
+			x1 = x1 + 38;
+			count1++;
+			if (count1 == dieTotal)
+			    break;
+		    }
+		    while ((x1 > 237) && ((y1 == 395) || (y1 == 317) || (y1 == 239) || (y1 == 161) || (y1 == 83)) && (count1 < dieTotal))
+		    {
+			x1 = x1 - 38;
+			count1++;
+			//winning place
+			if ((x1 == 237) && (y1 == 83))
+			{
+			    break;
+			}
+			if (count1 == dieTotal)
+			    break;
+		    }
+		    if ((x1 > 570) && (count1 < dieTotal))
+		    {
+			y1 = y1 - 39;
+			count1++;
+		    }
+		    if ((x1 < 274) && (count1 < dieTotal) && (x1 > 230))
+		    {
+			if ((x1 == 237) && (y1 == 83))
+			{
+			    break;
+			}
+			y1 = y1 - 39;
+			count1++;
+		    }
+		    //ladders
+		    if ((x1 == 237) && (y1 == 434) && (count1 == dieTotal))
+		    {
+			y1 = 317;
+			x1 = 313;
+		    }
+		    if ((x1 == 351) && (y1 == 434) && (count1 == dieTotal))
+		    {
+			x1 = 465;
+			y1 = 395;
+		    }
+		    if ((x1 == 541) && (y1 == 434) && (count1 == dieTotal))
+		    {
+			y1 = 317;
+			x1 = 579;
+		    }
+		    if ((x1 == 237) && (y1 == 356) && (count1 == dieTotal))
+		    {
+			y1 = 278;
+			x1 = 275;
+		    }
+		    if ((x1 == 503) && (y1 == 356) && (count1 == dieTotal))
+		    {
+			y1 = 122;
+			x1 = 351;
+		    }
+		    if ((x1 == 579) && (y1 == 239) && (count1 == dieTotal))
+		    {
+			y1 = 200;
+			x1 = 465;
+		    }
+		    if ((x1 == 237) && (y1 == 161) && (count1 == dieTotal))
+		    {
+			y1 = 83;
+		    }
+		    if ((x1 == 579) && (y1 == 161) && (count1 == dieTotal))
+		    {
+			y1 = 83;
+		    }
+		    //snakes
+		    if ((x1 == 351) && (y1 == 395) && (count1 == dieTotal))
+		    {
+			y1 = 434;
+			x1 = 465;
+		    }
+		    if ((x1 == 275) && (y1 == 200) && (count1 == dieTotal))
+		    {
+			y1 = 395;
+		    }
+		    if ((x1 == 465) && (y1 == 122) && (count1 == dieTotal))
+		    {
+			y1 = 356;
+			x1 = 351;
+		    }
+		    if ((x1 == 465) && (y1 == 239) && (count1 == dieTotal))
+		    {
+			y1 = 317;
+		    }
+		    if ((x1 == 351) && (y1 == 200) && (count1 == dieTotal))
+		    {
+			y1 = 239;
+			x1 = 237;
+		    }
+		    if ((x1 == 503) && (y1 == 83) && (count1 == dieTotal))
+		    {
+			y1 = 161;
+		    }
+		    if ((x1 == 427) && (y1 == 83) && (count1 == dieTotal))
+		    {
+			y1 = 161;
+		    }
+		    if ((x1 == 313) && (y1 == 83) && (count1 == dieTotal))
+		    {
+			y1 = 161;
+			x1 = 275;
+		    }
+		    }
+		    player1Moves++;
+		    }
+		    if((roll=='r')&&(playerTurn==player2Name))
+		    {
+		    c.setColor(Color.white);
+		    c.fillOval(198,433,33,33);
+		    die1Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    die2Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    dieTotal=die1Num+die2Num;
+		    c.print("Die1:"+ die1Num + " Die 2: " + die2Num + " Total: " + dieTotal);
+		    while(count2<dieTotal)
+		    {
+		    while ((x2 <= 570) && ((y2 == 434) || (y2 == 356) || (y2 == 278) || (y2 == 200) || (y2 == 122)))
+		    {
+			x2 = x2 + 38;
+			count2++;
+			if (count2 == dieTotal)
+			    break;
+		    }
+		    while ((x2 > 237) && ((y2 == 395) || (y2 == 317) || (y2 == 239) || (y2 == 161) || (y2 == 83)) && (count2 < dieTotal))
+		    {
+			x2 = x2 - 38;
+			count2++;
+			//winning place
+			if ((x2 == 237) && (y2 == 83))
+			{
+			    break;
+			}
+			if (count2 == dieTotal)
+			    break;
+		    }
+		    if ((x2 > 570) && (count2 < dieTotal))
+		    {
+			y2 = y2 - 39;
+			count2++;
+		    }
+		    if ((x2 < 274) && (count2 < dieTotal) && (x2 > 230))
+		    {
+			if ((x2 == 237) && (y2 == 83))
+			{
+			    break;
+			}
+			y2 = y2 - 39;
+			count2++;
+		    }
+		    //ladders
+		    if ((x2 == 237) && (y2 == 434) && (count2 == dieTotal))
+		    {
+			y2 = 317;
+			x2 = 313;
+		    }
+		    if ((x2 == 351) && (y2 == 434) && (count2 == dieTotal))
+		    {
+			x2 = 465;
+			y2 = 395;
+		    }
+		    if ((x2 == 541) && (y2 == 434) && (count2 == dieTotal))
+		    {
+			y2 = 317;
+			x2 = 579;
+		    }
+		    if ((x2 == 237) && (y2 == 356) && (count2 == dieTotal))
+		    {
+			y2 = 278;
+			x2 = 275;
+		    }
+		    if ((x2 == 503) && (y2 == 356) && (count2 == dieTotal))
+		    {
+			y2 = 122;
+			x2 = 351;
+		    }
+		    if ((x2 == 579) && (y2 == 239) && (count2 == dieTotal))
+		    {
+			y2 = 200;
+			x2 = 465;
+		    }
+		    if ((x2 == 237) && (y2 == 161) && (count2 == dieTotal))
+		    {
+			y2 = 83;
+		    }
+		    if ((x2 == 579) && (y2 == 161) && (count2 == dieTotal))
+		    {
+			y2 = 83;
+		    }
+		    //snakes
+		    if ((x2 == 351) && (y2 == 395) && (count2 == dieTotal))
+		    {
+			y2 = 434;
+			x2 = 465;
+		    }
+		    if ((x2 == 275) && (y2 == 200) && (count2 == dieTotal))
+		    {
+			y2 = 395;
+		    }
+		    if ((x2 == 465) && (y2 == 122) && (count2 == dieTotal))
+		    {
+			y2 = 356;
+			x2 = 351;
+		    }
+		    if ((x2 == 465) && (y2 == 239) && (count2 == dieTotal))
+		    {
+			y2 = 317;
+		    }
+		    if ((x2 == 351) && (y2 == 200) && (count2 == dieTotal))
+		    {
+			y2 = 239;
+			x2 = 237;
+		    }
+		    if ((x2 == 503) && (y2 == 83) && (count2 == dieTotal))
+		    {
+			y2 = 161;
+		    }
+		    if ((x2 == 427) && (y2 == 83) && (count2 == dieTotal))
+		    {
+			y2 = 161;
+		    }
+		    if ((x2 == 313) && (y2 == 83) && (count2 == dieTotal))
+		    {
+			y2 = 161;
+			x2 = 275;
+		    }
+		    }
+		    player2Moves++;
+		    }
+		    elseif(roll=='e')
+		    {
+		    return;
+		    }
+		    }
+		    pauseProgram();
+		    }
+
+
+		    publicvoidplayEasyGame()
+		    {
+		    charroll;
+		    StringplayerTurn="";
+		    Stringwinner="";
+		    intx1=175;
+		    inty1=420;
+		    intx2=175;
+		    inty2=420;
+		    intcount1=0;
+		    intcount2=0;
+		    intposition1;
+		    drawTitle();
+		    while(winner=="")
+		    {
+		    try
+		    {
+		    BufferedImageboardPic=ImageIO.read(new File ("Easy.jpg"));
+		    c.drawImage(boardPic,230,80,null);
+		    }
+		    catch(IOExceptione)
+		    {
+		    }
+		    //c.drawLine(230,80,230,475);
+		    //c.drawLine(230,80,635,80);
+		    c.setColor(Color.pink);
+		    c.fillOval(x1,y1,40,40);
+		    c.setColor(Color.blue);
+		    c.fillOval(x2,y2,40,40);
+		    c.setColor(Color.black);
+		    c.drawOval(x1,y1,40,40);
+		    c.drawOval(x2,y2,40,40);
+		    count1=0;
+		    count2=0;
+		    if(player1Moves>player2Moves)
+		    {
+		    playerTurn=player2Name;
+		    }
+		    elseif((x1==583)&&(y1==100))
+		    {
+		    count1=dieTotal;
+		    winner=player1Name;
+		    }
+		    elseif(player1Moves==player2Moves)
+		    {
+		    playerTurn=player1Name;
+		    }
+		    if((x2==583)&&(y2==100))
+		    {
+		    count2=dieTotal;
+		    winner=player2Name;
+		    winCheck2=true;
+		    c.println("" + player2Name + " won !");
+		    break;
+		    }
+		    elseif((x1==583)&&(y1==100))
+		    {
+		    count1=dieTotal;
+		    winner=player1Name;
+		    winCheck1=true;
+		    c.println("" + player1Name + " won !");
+		    break;
+		    }
+		    c.setCursor(3,1);
+		    c.println();
+		    c.setCursor(3,1);
+		    c.print("Itis"+playerTurn+"'sturn.  Press r to roll: ");
+		    roll=c.readChar();
+		    if((roll=='r')&&(playerTurn==player1Name))
+		    {
+		    c.setColor(Color.white);
+		    c.fillOval(174,419,43,43);
+		    die1Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    die2Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    dieTotal=die1Num+die2Num;
+		    c.print("Die1:"+ die1Num + " Die 2: " + die2Num + " Total: " + dieTotal);
+		    while(count1<dieTotal)
+		    {
+		    while ((x1 <= 535) && ((y1 == 420) || (y1 == 260) || (y1 == 100)))
+		    {
+			x1 = x1 + 68;
+			count1++;
+			if ((x1 == 583) && (y1 == 100))
+			{
+			    break;
+			}
+			if (count1 == dieTotal)
+			    break;
+		    }
+		    while ((x1 > 280) && ((y1 == 340) || (y1 == 180)) && (count1 < dieTotal))
+		    {
+			x1 = x1 - 68;
+			count1++;
+			if (count1 == dieTotal)
+			    break;
+		    }
+		    if ((x1 > 565) && (count1 < dieTotal))
+		    {
+			if ((x1 == 583) && (y1 == 100))
+			{
+			    break;
+			}
+			y1 = y1 - 80;
+			count1++;
+		    }
+		    if ((x1 < 293) && (count1 < dieTotal) && (x1 > 220))
+		    {
+			y1 = y1 - 80;
+			count1++;
+		    }
+		    //ladders
+		    if ((x1 == 379) && (y1 == 420) && (count1 == dieTotal))
+		    {
+			y1 = 180;
+		    }
+		    if ((x1 == 515) && (y1 == 420) && (count1 == dieTotal))
+		    {
+			y1 = 340;
+		    }
+		    if ((x1 == 311) && (y1 == 340) && (count1 == dieTotal))
+		    {
+			y1 = 100;
+		    }
+		    if ((x1 == 515) && (y1 == 180) && (count1 == dieTotal))
+		    {
+			y1 = 100;
+		    }
+		    //snakes
+		    if ((x1 == 379) && (y1 == 100) && (count1 == dieTotal))
+		    {
+			y1 = 420;
+			x1 = 243;
+		    }
+		    if ((x1 == 447) && (y1 == 180) && (count1 == dieTotal))
+		    {
+			y1 = 340;
+		    }
+		    if ((x1 == 583) && (y1 == 180) && (count1 == dieTotal))
+		    {
+			y1 = 340;
+		    }
+		    if ((x1 == 515) && (y1 == 260) && (count1 == dieTotal))
+		    {
+			y1 = 420;
+			x1 = 447;
+		    }
+		    }
+		    player1Moves++;
+		    }
+		    if((roll=='r')&&(playerTurn==player2Name))
+		    {
+		    c.setColor(Color.white);
+		    c.fillOval(174,419,43,43);
+		    die1Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    die2Num=((int)((6- 1 + 1) * Math.random () + 1));
+		    dieTotal=die1Num+die2Num;
+		    c.print("Die1:"+ die1Num + " Die 2: " + die2Num + " Total: " + dieTotal);
+		    while(count2<dieTotal)
+		    {
+		    while ((x2 <= 535) && ((y2 == 420) || (y2 == 260) || (y2 == 100)))
+		    {
+			x2 = x2 + 68;
+			count2++;
+			if ((x2 == 583) && (y2 == 100))
+			{
+			    break;
+			}
+			if (count2 == dieTotal)
+			    break;
+		    }
+		    while ((x2 > 280) && ((y2 == 340) || (y2 == 180)) && (count2 < dieTotal))
+		    {
+			x2 = x2 - 68;
+			count2++;
+			if (count2 == dieTotal)
+			    break;
+		    }
+		    if ((x2 > 565) && (count2 < dieTotal))
+		    {
+			if ((x2 == 583) && (y2 == 100))
+			{
+			    break;
+			}
+			y2 = y2 - 80;
+			count2++;
+		    }
+		    if ((x2 < 293) && (count2 < dieTotal) && (x2 > 220))
+		    {
+			y2 = y2 - 80;
+			count2++;
+		    }
+		    //ladders
+		    if ((x2 == 379) && (y2 == 420) && (count2 == dieTotal))
+		    {
+			y2 = 180;
+		    }
+		    if ((x2 == 515) && (y2 == 420) && (count2 == dieTotal))
+		    {
+			y2 = 340;
+		    }
+		    if ((x2 == 311) && (y2 == 340) && (count2 == dieTotal))
+		    {
+			y2 = 100;
+		    }
+		    if ((x2 == 515) && (y2 == 180) && (count2 == dieTotal))
+		    {
+			y2 = 100;
+		    }
+		    //snakes
+		    if ((x2 == 379) && (y2 == 100) && (count2 == dieTotal))
+		    {
+			y2 = 420;
+			x2 = 243;
+		    }
+		    if ((x2 == 447) && (y2 == 180) && (count2 == dieTotal))
+		    {
+			y2 = 340;
+		    }
+		    if ((x2 == 583) && (y2 == 180) && (count2 == dieTotal))
+		    {
+			y2 = 340;
+		    }
+		    if ((x2 == 515) && (y2 == 260) && (count2 == dieTotal))
+		    {
+			y2 = 420;
+			x2 = 447;
+		    }
+		    }
+		    player2Moves++;
+		    }
+		    elseif(roll=='e')
+		    {
+		    return;
+		    }
+		    }
+		    pauseProgram();
+		    }
+
+
+		    publicvoidgoodBye()
+		    {
+		    drawTitle();
+		    c.println("Thankyouforusingthisprogram!");
+		    c.println("ThisprogramwaswrittenbyEshaMahabir.");
+		    c.println('');
+		    c.println("Bye!");
+		    pauseProgram();
+		    c.close();
+		    }
+
+
+		    publicstaticvoidmain(String[]args)
+		    {
+		    SnakesandLadderss=newSnakesandLadders();
+		    //s.splashScreen();
+		    //while(true)
+
+		    //{
+		    //s.mainMenu();
+		    //if(s.choice==2)
+		    //{
+		    // s.instructions ();
+		    //}
+		    //elseif(s.choice== 3)
+		    //{
+		    s.highScore();
+		    //}
+		    //elseif(s.choice== 4)
+		    //{
+		    //  break;
+		    //}
+		    //elseif(s.choice == 1)
+		    //{
+		    //  s.players ();
+		    // s.difficultyLevel ();
+		    //  if (s.difficulty == 1)
+		    //  {
+		    //      s.playEasyGame ();
+		    //  }
+		    //  else if (s.difficulty == 2)
+		    //  {
+		    //      s.playHardGame ();
+		    //  }
+		    //}
+		    //}
+		    //s.goodBye();
+		    }
+		    }//main method
+
+
+
+
+		    
